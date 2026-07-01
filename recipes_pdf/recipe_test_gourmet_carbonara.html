@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha Técnica - Test Gourmet Carbonara</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e293b;
+      --secondary: #4f46e5;
+      --text: #334155;
+      --light-bg: #f8fafc;
+      --border: #e2e8f0;
+      --success: #10b981;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background: #ffffff;
+      padding: 40px;
+    }
+
+    .card-container {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      background: #ffffff;
+    }
+
+    header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+
+    .badge-cuisine {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .version-tag {
+      font-size: 1rem;
+      color: #64748b;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    /* Grid layout for meta info */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      background: var(--light-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .cost-box {
+      grid-column: 1 / -1;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      text-align: left;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cost-box .meta-value {
+      color: #15803d;
+      font-size: 1.15rem;
+    }
+
+    .cost-warning {
+      font-size: 0.75rem;
+      color: #b45309;
+      margin-top: 4px;
+    }
+
+    /* Main split layout for ingredients and nutrition */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .ingredients-list {
+      list-style: none;
+    }
+
+    .ingredients-list li {
+      display: flex;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .ingredients-list li::before {
+      content: "☐";
+      font-size: 1.2rem;
+      color: #cbd5e1;
+      margin-right: 12px;
+      line-height: 1;
+    }
+
+    .nutrition-box {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      height: fit-content;
+    }
+
+    .nutrition-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nutrition-row:last-child {
+      border-bottom: none;
+    }
+
+    .steps-section {
+      margin-top: 24px;
+    }
+
+    .step-card {
+      margin-bottom: 20px;
+      background: var(--light-bg);
+      border-left: 4px solid var(--secondary);
+      padding: 16px;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .step-number {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--secondary);
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      color: #475569;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        padding: 0;
+        background: none;
+      }
+      .card-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      button {
+        display: none !important;
+      }
+    }
+
+    .print-btn-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+      max-width: 800px;
+      margin: 0 auto 16px auto;
+    }
+
+    .print-btn {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .print-btn:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-btn-container">
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  </div>
+
+  <div class="card-container">
+    <header>
+      
+      <h1>Test Gourmet Carbonara</h1>
+      <div class="version-tag">1.0 - _"Primeira Tentativa"_</div>
+      
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="meta-label">Rendimento</div>
+          <div class="meta-value">2 porções</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Tempo</div>
+          <div class="meta-value">15 minutos</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Dificuldade</div>
+          <div class="meta-value">Fácil</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Congelável</div>
+          <div class="meta-value">Não</div>
+        </div>
+        
+        <div class="meta-item cost-box">
+          <div class="meta-label">Custo Estimado</div>
+          <div class="meta-value">R$ 7.50 (R$ 3.75 por porção)</div>
+          
+        </div>
+        
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <section>
+        <h2>🥦 Ingredientes</h2>
+        <ul class="ingredients-list">
+          <li>**150g** de **Test Ingredient Bacon**</li>
+        </ul>
+      </section>
+
+      <section>
+        <div class="nutrition-box">
+          <h2>📊 Nutrição</h2>
+          <p style="color: #64748b; font-style: italic;">Não estimada</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="steps-section">
+      <h2>🍳 Preparo</h2>
+      
+    </section>
+  </div>
+</body>
+</html>

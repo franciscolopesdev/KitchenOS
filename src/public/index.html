@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍳 KitchenOS - Prestige Culinary Engine</title>
+  <meta name="theme-color" content="#ff6b4a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- VIRTUAL CHEF WORKSPACE VIEW (HIDDEN BY DEFAULT) -->
+  <div id="chef-workspace" style="display: flex; flex-direction: column; width: 100%;">
+    <div id="api-banner" class="hidden">
+      <span>⚠️ Para conversar com a Chef IA, insira sua <strong>Gemini API Key</strong>:</span>
+      <input type="password" id="api-key-input" placeholder="AIzaSy...">
+      <button id="save-api-key">Salvar</button>
+    </div>
+
+    <header class="app-header">
+      <div class="logo">
+        <div id="canvas-3d-container" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; filter: drop-shadow(0 0 10px rgba(255, 107, 74, 0.45)); margin-right: 8px;"></div>
+        <div>
+          <h1>KitchenOS</h1>
+          <p>Prestige Culinary Engine</p>
+        </div>
+      </div>
+      <div class="header-controls" style="display: flex; gap: 12px; align-items: center;">
+        <div class="header-status michelin-header-badge" style="border-color: var(--accent-gold); color: var(--accent-gold); font-weight: bold; font-family: var(--font-title); font-size: 10px; letter-spacing: 0.05em;">
+          Prestige Level 3
+        </div>
+        
+        <button id="change-api-key-btn" class="header-btn">🔑 Chave API</button>
+        <div class="header-status">
+          <span class="status-indicator"></span> Core Online
+        </div>
+      </div>
+    </header>
+
+    <main class="app-container">
+      <!-- LEFT SIDE: AI CHEF AGENT CHAT -->
+      <section class="chat-section card terminal-console">
+        <div class="card-header terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <h2 class="terminal-title">CHEF_IA_CORE@KITCHENOS</h2>
+          <div class="terminal-status-badge">
+            <i data-lucide="cpu" class="lucide-icon-inline" style="width: 12px; height: 12px; stroke-width: 2px;"></i> LIVE
+          </div>
+        </div>
+        <div id="chat-messages" class="chat-body terminal-body-chat">
+          <div class="message model">
+            <div class="bubble">
+              <span class="terminal-prompt">KOS ></span> Olá, Francisco! Eu sou a sua Chef Assistente do KitchenOS. 🥘<br><br>
+              Como posso te ajudar hoje? Posso sugerir receitas com base no seu estoque, adicionar itens à lista de compras ou iniciar cronômetros de cozinha!
+            </div>
+          </div>
+        </div>
+        <div class="chat-footer terminal-footer">
+          <span class="terminal-input-prompt">&gt;_</span>
+          <input type="text" id="chat-input" placeholder="Solicitar raciocínio culinário...">
+          <button id="chat-send" class="magnetic" data-dist="0.25">Executar</button>
+        </div>
+      </section>
+
+      <!-- RIGHT SIDE: INTERACTIVE SPA DASHBOARD -->
+      <section class="dashboard-section">
+        <!-- Tabs Navigation (13 tabs) -->
+        <nav class="tabs-nav">
+          <button class="tab-btn active" data-tab="dashboard">📊 Geral</button>
+          <button class="tab-btn" data-tab="estoque">🥦 Estoque</button>
+          <button class="tab-btn" data-tab="compras">🛒 Compras</button>
+          <button class="tab-btn" data-tab="receitas">🍳 Receitas</button>
+          <button class="tab-btn" data-tab="chef-ia">👩‍🍳 Presets</button>
+          <button class="tab-btn" data-tab="cooking-session">⏱️ Session</button>
+          <button class="tab-btn" data-tab="equipamentos">🔧 Equipamentos</button>
+          <button class="tab-btn" data-tab="saude">🩺 Saúde</button>
+          <button class="tab-btn" data-tab="objetivos">🎯 Objetivos</button>
+          <button class="tab-btn" data-tab="timeline">📜 Timeline</button>
+          <button class="tab-btn" data-tab="analytics">📈 Analytics</button>
+          <button class="tab-btn" data-tab="perfil-chef">👤 Perfil</button>
+          <button class="tab-btn" data-tab="configuracoes">⚙️ Ajustes</button>
+        </nav>
+
+        <!-- Tab 1: Geral (Dashboard overview) -->
+        <div id="tab-dashboard" class="tab-content active card" style="gap: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="layout" class="lucide-icon-title"></i> Visão Geral da Cozinha</h3>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-green);">[SESSÃO ATIVA: NENHUMA]</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div class="stat-box" style="background: rgba(255,255,255,0.01); border: 1px solid var(--panel-border); border-radius: 4px; padding: 16px;">
+              <span class="stat-num" id="dash-stock-count">--</span>
+              <span class="stat-lbl">Itens em Estoque</span>
+            </div>
+            <div class="stat-box" style="background: rgba(255,255,255,0.01); border: 1px solid var(--panel-border); border-radius: 4px; padding: 16px;">
+              <span class="stat-num" id="dash-timers-count">0</span>
+              <span class="stat-lbl">Timers Ativos</span>
+            </div>
+            <div class="stat-box" style="background: rgba(255,255,255,0.01); border: 1px solid var(--panel-border); border-radius: 4px; padding: 16px;">
+              <span class="stat-num" id="dash-prestige-rank" style="color: var(--accent-gold); font-size: 14px; font-family: var(--font-mono);">Rank</span>
+              <span class="stat-lbl">Prestige Rank</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex: 1; overflow: hidden;">
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 16px; overflow-y: auto;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; color: white;">Notificações e Sugestões Recentes</h4>
+              <div id="dashboard-notifications-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Filled dynamically by JS -->
+              </div>
+            </div>
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 16px; overflow-y: auto;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; color: white;">Zonas de Cocção & Clima</h4>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-family: var(--font-mono); font-size: 12px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 6px;">
+                  <span>Temperatura Cozinha:</span>
+                  <span style="color: white;">24.5 °C</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 6px;">
+                  <span>Umidade Ar:</span>
+                  <span style="color: white;">52 %</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 6px;">
+                  <span>Pressão Coifa:</span>
+                  <span style="color: var(--accent-green);">1013 hPa</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 6px;">
+                  <span>Status do Clima Local:</span>
+                  <span id="dash-weather-val" style="color: white;">Aguardando...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Estoque (Freezer, Fridge, Pantry) -->
+        <div id="tab-estoque" class="tab-content">
+          <div class="inventory-grid">
+            <div class="inventory-col card col-freezer">
+              <h3><i data-lucide="snowflake" class="lucide-icon-title"></i> Freezer</h3>
+              <ul id="list-freezer" class="stock-list"></ul>
+            </div>
+            <div class="inventory-col card col-fridge">
+              <h3><i data-lucide="droplets" class="lucide-icon-title"></i> Geladeira</h3>
+              <ul id="list-fridge" class="stock-list"></ul>
+            </div>
+            <div class="inventory-col card col-pantry">
+              <h3><i data-lucide="container" class="lucide-icon-title"></i> Despensa</h3>
+              <ul id="list-pantry" class="stock-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Compras (Automatic purchases, timeline) -->
+        <div id="tab-compras" class="tab-content card tab-split-compras">
+          <div class="compras-left-panel">
+            <div class="shopping-header">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <h3><i data-lucide="shopping-cart" class="lucide-icon-title"></i> Lista de Compras</h3>
+                <button id="btn-clear-shopping" class="btn-danger-minimal">Limpar Lista</button>
+              </div>
+              <div class="add-item-form">
+                <select id="select-ingredient"></select>
+                <input type="number" id="input-amount" placeholder="Qtd" min="0.1" step="0.1">
+                <input type="text" id="input-unit" placeholder="un..." style="width: 70px;">
+                <button id="btn-add-shopping" class="magnetic" data-dist="0.3">Inserir</button>
+              </div>
+            </div>
+            <ul id="shopping-list-items" class="shopping-list"></ul>
+          </div>
+          
+          <div class="compras-right-panel">
+            <div class="panel-header-sub">
+              <span class="section-tag-mono">[INTELLIGENT SUPPLY]</span>
+              <h3>Fluxo Automático</h3>
+            </div>
+            
+            <div class="supply-card">
+              <div class="supply-row">
+                <span class="supply-lbl">Fornecedor:</span>
+                <span class="supply-val">Hortifruti Central Distribuidora</span>
+              </div>
+              <div class="supply-row">
+                <span class="supply-lbl">Preço Estimado:</span>
+                <span class="supply-val price-highlight">R$ 148,20</span>
+              </div>
+              <div class="supply-ai-box">
+                <div class="supply-ai-header">
+                  <i data-lucide="sparkles" style="width: 14px; height: 14px; color: var(--primary);"></i>
+                  <span>Sugestão da Chef</span>
+                </div>
+                <p class="supply-ai-desc">Ingredientes de hortifruti têm cotação 12% menor às terças-feiras. O pedido automático foi agendado.</p>
+              </div>
+            </div>
+
+            <!-- Supply Chain Timeline -->
+            <div class="supply-timeline">
+              <div class="s-time-step done">
+                <div class="s-time-indicator"><i data-lucide="check" style="width: 10px; height: 10px; color: black; display: block;"></i></div>
+                <div class="s-time-info">
+                  <span class="s-time-title">Estoque Crítico</span>
+                  <span class="s-time-desc">Detecção automática de ausência de ingredientes.</span>
+                </div>
+              </div>
+              <div class="s-time-step active">
+                <div class="s-time-indicator"></div>
+                <div class="s-time-info">
+                  <span class="s-time-title">Cotação Realizada</span>
+                  <span class="s-time-desc">Comparando distribuidores locais cadastrados.</span>
+                </div>
+              </div>
+              <div class="s-time-step">
+                <div class="s-time-indicator"></div>
+                <div class="s-time-info">
+                  <span class="s-time-title">Faturamento & Despacho</span>
+                  <span class="s-time-desc">Envio direto ao fornecedor homologado.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Receitas (intelligent adaptations, YouTube) -->
+        <div id="tab-receitas" class="tab-content card" style="gap: 15px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="book-open" class="lucide-icon-title"></i> Receitas & Adaptação Culinária</h3>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 12px; color: var(--text-muted);">Buscar Vídeo:</span>
+              <input type="text" id="recipe-yt-query" placeholder="ex: Temperar linguiça..." style="background: #000; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; color: white; font-size: 12px; width: 180px;">
+              <button id="btn-search-recipe-yt" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 4px 10px; font-size: 11px; font-family: var(--font-title); cursor: pointer;">Procurar</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; flex: 1; overflow: hidden;">
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px; overflow-y: auto;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; margin-bottom: 10px; color: white;">Lista de Receitas Disponíveis</h4>
+              <ul id="recipes-catalog-list" style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
+                <!-- Filled dynamically by JS -->
+              </ul>
+              
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px; color: white;">Vídeos do YouTube Encontrados</h4>
+              <div id="recipe-yt-results" style="display: flex; flex-direction: column; gap: 8px;">
+                <p style="font-size: 11px; color: var(--text-muted); text-align: center;">Nenhuma busca realizada</p>
+              </div>
+            </div>
+
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px; display: flex; flex-direction: column; overflow: hidden;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white;">Adaptação reativa (CRE)</h4>
+                <select id="recipe-target-eq" style="background: #000; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px; color: white; font-size: 12px;">
+                  <option value="Air Fryer">Air Fryer</option>
+                  <option value="Panela de Pressão">Panela de Pressão</option>
+                  <option value="Forno">Forno</option>
+                  <option value="Frigideira Inox">Frigideira Inox</option>
+                </select>
+              </div>
+
+              <div id="recipe-details-panel" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 40px;">Selecione uma receita ao lado para ver detalhes e adaptar.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Chef IA Presets & Memory -->
+        <div id="tab-chef-ia" class="tab-content card" style="gap: 15px;">
+          <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="sparkles" class="lucide-icon-title"></i> Contexto & Presets de Raciocínio</h3>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow-y: auto;">
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 10px;">Contexto de Memória</h4>
+              <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 15px;">
+                O KitchenOS mantém a biografia e histórico do Chef sincronizados no SQLite e Notion. A IA analisa desvios de textura e tempo para evoluir receitas de forma autônoma.
+              </p>
+              <div style="border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 12px;">
+                <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--primary); display: block; margin-bottom: 8px;">Destaque do Histórico:</span>
+                <ul style="font-size: 12px; list-style: none; display: flex; flex-direction: column; gap: 6px;">
+                  <li>🍳 Francisco realizou 5 preparos Michelin.</li>
+                  <li>🥩 Bisteca Suína foi otimizada para v1.1 na Air Fryer.</li>
+                  <li>🌶️ Digníssima comeu até os pimentões (nota 10/10).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 5px;">Atalhos de Raciocínio (Prompt Presets)</h4>
+              <button class="header-btn prompt-preset-btn" style="justify-content: flex-start; text-align: left; padding: 10px;" data-prompt="O que posso cozinhar hoje com base no meu estoque?">
+                <span>🥦</span> Sugerir receitas por estoque ativo
+              </button>
+              <button class="header-btn prompt-preset-btn" style="justify-content: flex-start; text-align: left; padding: 10px;" data-prompt="Verifique se há ingredientes vencendo nos próximos 3 dias e me sugira receitas.">
+                <span>⚠️</span> Verificar prazos de validade críticos
+              </button>
+              <button class="header-btn prompt-preset-btn" style="justify-content: flex-start; text-align: left; padding: 10px;" data-prompt="Como posso adaptar uma receita de frango grelhado para Panela de Pressão mantendo a umidade?">
+                <span>🔬</span> Raciocínio Físico para Pressão
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 6: Cooking Session (Full screen focus mode) -->
+        <div id="tab-cooking-session" class="tab-content card" style="gap: 15px; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="maximize" class="lucide-icon-title"></i> Cooking Session Focus</h3>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--primary);">MODO CHEF TELA CHEIA</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex: 1; overflow: hidden;">
+            <div class="card" style="background: rgba(0,0,0,0.3); border-color: var(--panel-border); padding: 16px; display: flex; flex-direction: column; overflow: hidden;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; color: white;">Etapas e Checklist</h4>
+              <div id="session-steps-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <p style="color: var(--text-muted); text-align: center; margin-top: 40px;">Nenhuma sessão culinária ativa. Inicie pelo chat ou catálogo de receitas.</p>
+              </div>
+            </div>
+
+            <div class="card" style="background: rgba(0,0,0,0.3); border-color: var(--panel-border); padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
+              <div id="session-timer-circle" style="width: 140px; height: 140px; position: relative; display: flex; align-items: center; justify-content: center;">
+                <svg width="140" height="140" style="position: absolute;">
+                  <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="4"/>
+                  <circle id="session-timer-progress-svg" cx="70" cy="70" r="60" fill="none" stroke="var(--primary)" stroke-width="4" stroke-dasharray="377" stroke-dashoffset="377" transform="rotate(-90 70 70)"/>
+                </svg>
+                <div style="text-align: center;">
+                  <span id="session-timer-clock-text" style="font-family: var(--font-mono); font-size: 26px; font-weight: bold; color: white;">00:00</span>
+                  <span style="display: block; font-size: 9px; font-family: var(--font-mono); color: var(--text-muted); margin-top: 2px;">TIME REMAINING</span>
+                </div>
+              </div>
+
+              <!-- Hands-free voice control visual simulator -->
+              <div style="background: rgba(16, 185, 129, 0.02); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 6px; padding: 12px; width: 100%; text-align: center;">
+                <button id="btn-toggle-mic" class="magnetic" data-dist="0.2" style="background: var(--accent-green); border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: black;">
+                  <i data-lucide="mic" style="width: 20px; height: 20px; stroke-width: 2.5px;"></i>
+                </button>
+                <div id="mic-status-label" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-green); margin-top: 8px; font-weight: bold; text-transform: uppercase;">Mãos Livres Ativo</div>
+                <p style="font-size: 10.5px; color: var(--text-secondary); margin-top: 4px;">Fale "Proximo passo" ou "Parar cronômetro" para controle por voz.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 7: Equipamentos (Oven, mixer, telemetry) -->
+        <div id="tab-equipamentos" class="tab-content card">
+          <div class="equipments-header" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.12); padding-bottom: 16px; margin-bottom: 16px;">
+            <h3>🔧 Equipamentos & Telemetria</h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 4px;">Monitore as temperaturas de operação e a vida útil estimada do seu maquinário culinário.</p>
+          </div>
+          
+          <div class="equipments-grid" id="equipments-list-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; max-height: 240px; overflow-y: auto; padding-right: 5px;">
+            <!-- Rendered dynamically by JS -->
+          </div>
+        </div>
+
+        <!-- Tab 8: Saúde (Staff well-being, posture scanner) -->
+        <div id="tab-saude" class="tab-content card" style="gap: 15px;">
+          <div class="health-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); padding-bottom: 16px; margin-bottom: 16px;">
+            <h3><i data-lucide="activity" class="lucide-icon-title"></i> Ergonomia & Temperatura de Cozinha</h3>
+            <span style="font-size: 11px; font-family: var(--font-mono); color: var(--accent-green); background: rgba(16, 185, 129, 0.05); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.15);">WELL-BEING LEVEL: EXCELLENT</span>
+          </div>
+
+          <div class="health-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;">
+            <div class="health-col" style="display: flex; flex-direction: column; gap: 15px;">
+              <div class="health-progress-card" style="background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 15px;">
+                <div class="health-progress-bar-group">
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; font-family: var(--font-mono);">
+                    <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="flame" style="width: 13px; height: 13px; color: var(--primary);"></i> Calorias Diárias</span>
+                    <span id="health-cal-text">0 / 0 kcal</span>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px; overflow: hidden;">
+                    <div id="health-cal-bar" style="background: var(--primary); width: 0%; height: 100%; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <div class="health-progress-bar-group">
+                  <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; font-family: var(--font-mono);">
+                    <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="droplets" style="width: 13px; height: 13px; color: var(--accent-blue);"></i> Ingestão Hidratação</span>
+                    <span id="health-water-text">0 / 0 ml</span>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px; overflow: hidden;">
+                    <div id="health-water-bar" style="background: var(--accent-blue); width: 0%; height: 100%; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <!-- Posture alert module -->
+                <div style="background: rgba(245, 158, 11, 0.02); border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="accessibility" style="width: 16px; height: 16px; color: #f59e0b;"></i>
+                    <span style="font-size: 11px; font-family: var(--font-mono); color: white;">Scanner de Postura:</span>
+                  </div>
+                  <span style="font-size: 11px; font-family: var(--font-mono); color: #f59e0b; font-weight: bold;">COLUNA ERETA RECOMENDADA</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="health-col" style="display: flex; flex-direction: column; gap: 12px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white;">Pausas & Fadiga</h4>
+              <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px; font-family: var(--font-mono); font-size: 11.5px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <span>Próximo Intervalo:</span>
+                  <span style="color: white;">em 42 min</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Nível Estresse Cozinha:</span>
+                  <span style="color: var(--accent-green);">Baixo (Silencioso)</span>
+                </div>
+              </div>
+              <div class="log-actions-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; align-items: center; justify-content: space-between;">
+                  <span style="font-size: 12px; display: flex; align-items: center; gap: 6px;"><i data-lucide="glass-water" style="width: 13px; height: 13px; color: var(--accent-blue);"></i> Registro de Água</span>
+                  <div style="display: flex; gap: 4px;">
+                    <button class="quick-log-btn" data-type="water" data-value="250">+250ml</button>
+                    <button class="quick-log-btn" data-type="water" data-value="500">+500ml</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 9: Objetivos (Gamification, prestige levels) -->
+        <div id="tab-objetivos" class="tab-content card">
+          <div class="objectives-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 16px; margin-bottom: 16px;">
+            <h3>🎯 Prestige Levels & Objetivos</h3>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-gold);">LEVEL XP: 14,200 pts</span>
+          </div>
+          <div class="objectives-container" style="display: grid; grid-template-columns: 1fr; gap: 20px; overflow-y: auto; flex: 1; padding-right: 4px;">
+            <div id="objectives-list" class="objectives-list" style="display: flex; flex-direction: column; gap: 15px;">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 10: Timeline (Cooking logs database) -->
+        <div id="tab-timeline" class="tab-content card">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 15px;">
+            <h3>📜 Linha do Tempo & Biografia Culinária</h3>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="timeline-search-input" placeholder="Pesquisar registros..." style="background: #000; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; color: white; font-size: 11.5px; width: 140px;">
+              <button id="btn-timeline-search" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: white; border-radius: 4px; padding: 4px 10px; font-size: 11px; cursor: pointer;">Buscar</button>
+            </div>
+          </div>
+          <div id="timeline-content" class="timeline-body"></div>
+        </div>
+
+        <!-- Tab 11: Analytics (Costs, Profit, waste factor) -->
+        <div id="tab-analytics" class="tab-content card" style="gap: 15px;">
+          <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="bar-chart-2" class="lucide-icon-title"></i> Telemetria Financeira e Desperdício</h3>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div class="stat-box">
+              <span class="stat-num" style="color: var(--accent-red);">R$ 1,420</span>
+              <span class="stat-lbl">Custo Ingredientes (Mês)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num" style="color: var(--accent-green);">R$ 6,800</span>
+              <span class="stat-lbl">Lucro Estimado</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num" style="color: var(--accent-gold);">78.2%</span>
+              <span class="stat-lbl">Margem de Lucro</span>
+            </div>
+          </div>
+
+          <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px;">
+            <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 12px;">Fator Desperdício (Yield Factor)</h4>
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11.5px; margin-bottom: 6px;">
+              <span>Média de Desperdício:</span>
+              <span style="color: var(--accent-green); font-weight: bold;">2.4 % (Excelente)</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
+              <div style="background: var(--accent-green); width: 2.4%; height: 100%;"></div>
+            </div>
+            <p style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
+              A auto-depreciação de estoque pós-preparo e a cotação inteligente de fornecedores reduziram as perdas de ingredientes frescos em 14.8% no último quadrimestre.
+            </p>
+          </div>
+        </div>
+
+        <!-- Tab 12: Perfil do Chef (achievements, signature level stars) -->
+        <div id="tab-perfil-chef" class="tab-content card" style="gap: 15px;">
+          <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="user" class="lucide-icon-title"></i> Perfil do Cozinheiro</h3>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-gold);">SIGNATURE CLASS</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; flex: 1; overflow-y: auto;">
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px; align-items: center; text-align: center; gap: 12px;">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: #222; border: 2px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; font-size: 32px; filter: drop-shadow(0 0 10px rgba(255,215,0,0.2));">👨‍🍳</div>
+              <div>
+                <h4 style="font-family: var(--font-title); font-size: 16px; color: white;">Francisco</h4>
+                <p style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); margin-top: 2px;">Cozinheiro Executivo</p>
+              </div>
+              <div style="border-top: 1px dashed rgba(255,255,255,0.05); width: 100%; padding-top: 12px; margin-top: 5px;">
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 4px;">Signature Prestige:</span>
+                <span id="chef-prestige-rank" style="font-size: 12px; color: var(--accent-gold); font-family: var(--font-mono); font-weight: bold;">Bronze Culinário</span>
+              </div>
+            </div>
+
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 12px;">Medalhas & Conquistas</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11.5px;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">🔥</span>
+                  <div>
+                    <strong style="color: white; display: block;">Mestre Brasa</strong>
+                    <span style="color: var(--text-secondary); font-size: 10px;">Cozimento perfeito</span>
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">🗡️</span>
+                  <div>
+                    <strong style="color: white; display: block;">Faca Afiada</strong>
+                    <span style="color: var(--text-secondary); font-size: 10px;">Lâminas de precisão</span>
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">💧</span>
+                  <div>
+                    <strong style="color: white; display: block;">Hidratação Max</strong>
+                    <span style="color: var(--text-secondary); font-size: 10px;">Ergonomia ok</span>
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">📦</span>
+                  <div>
+                    <strong style="color: white; display: block;">Estoque Zero</strong>
+                    <span style="color: var(--text-secondary); font-size: 10px;">Sem desperdícios</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 13: Configurações (integrations, API) -->
+        <div id="tab-configuracoes" class="tab-content card" style="gap: 15px;">
+          <div style="border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <h3 style="font-family: var(--font-title); font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.05em;"><i data-lucide="settings" class="lucide-icon-title"></i> Configurações do Sistema</h3>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex: 1; overflow-y: auto;">
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px; gap: 15px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white;">Credenciais e API</h4>
+              <div>
+                <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500;">Gemini API Key</label>
+                <input type="password" id="settings-api-key" placeholder="AIzaSy..." style="width: 100%; background: #000; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px; color: white; font-size: 13px; font-family: var(--font-mono); outline: none;">
+                <button id="btn-save-settings-key" style="background: white; color: black; border: none; border-radius: 4px; padding: 8px 16px; font-family: var(--font-title); font-weight: 700; font-size: 11px; margin-top: 10px; cursor: pointer; text-transform: uppercase;">Salvar Chave</button>
+              </div>
+
+              <div style="border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 12px;">
+                <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 8px;">Backup e Notion</h4>
+                <div style="display: flex; gap: 8px;">
+                  <button class="header-btn" style="padding: 8px 12px;">🔄 Forçar Sync Notion</button>
+                  <button class="header-btn" style="padding: 8px 12px;">📥 Exportar Backup</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="background: rgba(0,0,0,0.2); border-color: var(--panel-border); padding: 15px;">
+              <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: white; margin-bottom: 12px;">Permissões da Equipe</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" checked style="accent-color: var(--primary);">
+                  <span>Chef pode alterar receitas</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" checked style="accent-color: var(--primary);">
+                  <span>Ajudantes podem registrar experimentos</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" style="accent-color: var(--primary);">
+                  <span>Ajudantes podem limpar lista de compras</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" checked style="accent-color: var(--primary);">
+                  <span>Gravar áudio mãos livres no celular</span>
+                </label>
+              </div>
+
+              <!-- Self-Test Section -->
+              <div style="border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 15px; padding-top: 15px;">
+                <h4 style="font-family: var(--font-title); font-size: 12px; text-transform: uppercase; color: var(--primary); margin-bottom: 8px;">🧪 Sistema de Diagnóstico</h4>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Execute a suíte de auto-testes automatizados para validar todas as abas e botões do DOM.</p>
+                <button id="btn-trigger-self-test" class="header-btn" style="background: transparent; border-color: var(--primary); color: var(--primary); width: 100%; font-weight: bold; cursor: pointer;">Executar Auto-Teste de DOM</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+
+  <!-- Floating Self-Test Runner Widget -->
+  <div id="test-runner-widget" class="card hidden" style="position: fixed; bottom: 80px; right: 30px; width: 340px; z-index: 9999; background: rgba(13, 13, 18, 0.98); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto;">
+    <div style="padding: 10px 16px; background: rgba(255, 107, 74, 0.1); border-bottom: 1px dashed rgba(255, 107, 74, 0.2); display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-family: var(--font-title); font-weight: bold; font-size: 11px; letter-spacing: 0.08em; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="shield-check" class="lucide-icon-inline" style="width: 13px; height: 13px; stroke-width: 2px;"></i> KITCHENOS_DOM_TESTER
+      </div>
+      <button id="btn-close-tester" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 10px; font-family: var(--font-mono); font-weight: bold;">[ ESC ]</button>
+    </div>
+    <div id="tester-log" style="flex: 1; padding: 15px; overflow-y: auto; max-height: 200px; font-family: var(--font-mono); font-size: 10.5px; line-height: 1.5; color: var(--text-secondary); background: #07070a;">
+      <span style="color: var(--text-muted);">Aguardando início...</span>
+    </div>
+    <div style="padding: 10px 15px; border-top: 1px dashed rgba(255,255,255,0.05); display: flex; gap: 8px;">
+      <button id="btn-run-all-tests" style="flex: 1; background: var(--primary); border: none; border-radius: 4px; padding: 6px; color: black; font-family: var(--font-title); font-weight: bold; font-size: 10.5px; cursor: pointer; text-transform: uppercase;">Iniciar Teste</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

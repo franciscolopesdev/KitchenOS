@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+notion_databases.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.drizzle/
